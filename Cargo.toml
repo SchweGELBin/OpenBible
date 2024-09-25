@@ -1,0 +1,25 @@
+[package]
+name = "openbible"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+
+[package.metadata.android]
+package = "com.schwegelbin.openbible"
+build_targets = [ "aarch64-linux-android" ]
+
+[package.metadata.android.sdk]
+min_sdk_version = 23
+target_sdk_version = 34
+max_sdk_version = 34
+
+[package.metadata.android.application]
+theme = "@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen"
+label = "OpenBible"
+
+
+[dependencies]
+slint = { version = "1.6", features = ["backend-android-activity-06"] }
