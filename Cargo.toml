@@ -17,8 +17,9 @@ target_sdk_version = 34
 max_sdk_version = 34
 
 [package.metadata.android.application]
-theme = "@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen"
+theme = "@android:style/Theme.DeviceDefault"
 label = "OpenBible"
+orientation = "portrait"
 
 [[package.metadata.android.uses_permission]]
 name = "android.permission.ACCESS_NETWORK_STATE"
