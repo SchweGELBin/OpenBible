@@ -22,7 +22,7 @@ const DATA_DIR: &str = "/storage/emulated/0/Android/data/com.schwegelbin.openbib
 fn android_main(app: android::AndroidApp) {
     android::init(app).unwrap();
     slint::slint! {
-        export component MainWindow inherits Window {
+        export component TextWindow inherits Window {
             in-out property<string> chapter;
             in-out property<string> text;
 
@@ -57,16 +57,16 @@ fn android_main(app: android::AndroidApp) {
             }
         }
     }
-    let ui = MainWindow::new().unwrap();
+    let ui_text = TextWindow::new().unwrap();
 
     save_index();
     download_translation("schlachter");
     let update_available = check_update("schlachter");
 
-    ui.set_chapter(get_title("schlachter", 18, 118).unwrap().into());
-    ui.set_text(get_chapter("schlachter", 18, 118).unwrap().into());
+    ui_text.set_chapter(get_title("schlachter", 18, 118).unwrap().into());
+    ui_text.set_text(get_chapter("schlachter", 18, 118).unwrap().into());
 
-    ui.run().unwrap();
+    ui_text.run().unwrap();
 }
 
 // Saves an index of all translations
