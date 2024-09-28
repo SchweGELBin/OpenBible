@@ -10,6 +10,11 @@ struct Verse {
     text: String,
 }
 
+#[derive(serde::Deserialize)]
+struct Chapter {
+    name: String,
+}
+
 const DATA_DIR: &str = "/storage/emulated/0/Android/data/com.schwegelbin.openbible/files";
 
 // Android Main Function
@@ -18,8 +23,38 @@ fn android_main(app: android::AndroidApp) {
     android::init(app).unwrap();
     slint::slint! {
         export component MainWindow inherits Window {
+            in-out property<string> chapter;
             in-out property<string> text;
-            Text { text: text; }
+
+            background: black;
+
+            VerticalLayout{
+                    width: 96%;
+
+                Rectangle {
+                    width: parent.width;
+                    height: 50px;
+
+                    Text {
+                        text: chapter;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                    }
+                }
+                Flickable {
+                    width: parent.width;
+                    height: 100%;
+                    viewport-height: 5500px;
+
+                    Text {
+                        text: text;
+                        width: parent.width;
+                        height: parent.viewport-height;
+                        horizontal-alignment: left;
+                        vertical-alignment: top;
+                    }
+                }
+            }
         }
     }
     let ui = MainWindow::new().unwrap();
@@ -28,7 +63,8 @@ fn android_main(app: android::AndroidApp) {
     download_translation("schlachter");
     let update_available = check_update("schlachter");
 
-    ui.set_text(get_chapter("schlachter", 5, 6).unwrap().into());
+    ui.set_chapter(get_title("schlachter", 18, 118).unwrap().into());
+    ui.set_text(get_chapter("schlachter", 18, 118).unwrap().into());
 
     ui.run().unwrap();
 }
@@ -67,14 +103,23 @@ fn get_latest_checksum(abbrev: &str) -> Result<String, Box<dyn Error>> {
 
 // Returns a String of every verse of a chosen chapter of a chosen book of a chosen translation
 fn get_chapter(abbrev: &str, book: usize, chapter: usize) -> Result<String, Box<dyn Error>> {
+    let mut text = String::new();
     let file: String = fs::read_to_string(format!("{}/{}.json", DATA_DIR, &abbrev))?;
     let json: serde_json::Value = serde_json::from_str(&file)?;
-    let mut chapter_string = String::new();
     let verses: Vec<Verse> =
         serde_json::from_value(json["books"][book]["chapters"][chapter]["verses"].clone())?;
     println!("{}", json["books"][book]["chapters"][chapter]["name"]);
     for verse in verses {
-        chapter_string.push_str(format!("{}\t{}\n", verse.verse, verse.text).as_str());
+        text.push_str(format!("{} {}\n", verse.verse, verse.text).as_str());
     }
-    Ok(chapter_string)
+    Ok(text)
+}
+
+// Returns a String of the Title of a chosen chapter
+fn get_title(abbrev: &str, book: usize, chapter: usize) -> Result<String, Box<dyn Error>> {
+    let file: String = fs::read_to_string(format!("{}/{}.json", DATA_DIR, &abbrev))?;
+    let json: serde_json::Value = serde_json::from_str(&file)?;
+    let title: Chapter = serde_json::from_value(json["books"][book]["chapters"][chapter].clone())?;
+    let title = format!("{}\n{:?}", abbrev, title.name);
+    Ok(title)
 }
