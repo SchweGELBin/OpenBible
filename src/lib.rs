@@ -111,6 +111,9 @@ fn download_translation(abbrev: &str) -> Result<(), Box<dyn Error>> {
 // Return a bool, wether the online version has a different checksum
 fn check_update(abbrev: &str) -> Result<bool, Box<dyn Error>> {
     let latest = get_latest_checksum(&abbrev)?;
+    if !fs::exists(format!("{}/{}.json", DATA_DIR, &abbrev))? {
+        return Ok(true);
+    };
     let current = match fs::read_to_string(format!("{}/{}-checksum.json", DATA_DIR, &abbrev)) {
         Ok(data) => data,
         Err(_) => String::new(),
