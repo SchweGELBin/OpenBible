@@ -19,12 +19,37 @@ const DATA_DIR: &str = "/storage/emulated/0/Android/data/com.schwegelbin.openbib
 
 // Android Main Function
 #[no_mangle]
-fn android_main(app: android::AndroidApp) {
+fn android_main(app: android::AndroidApp) -> Result<(), Box<dyn Error>> {
     android::init(app).unwrap();
+
+    save_index();
+    if check_update("schlachter")? {
+        download_translation("schlachter");
+    }
+
+    ui_text("schlachter", 18, 118);
+    Ok(())
+}
+
+// Display UI for the translation selection
+#[no_mangle]
+fn ui_select() {
+    slint::slint! {
+        export component SelectWindow inherits Window {
+            background: black;
+        }
+    }
+    let ui = SelectWindow::new().unwrap();
+    ui.run().unwrap();
+}
+
+// Display UI fo the text
+#[no_mangle]
+fn ui_text(abbrev: &str, book: usize, chapter: usize) {
     slint::slint! {
         export component TextWindow inherits Window {
-            in-out property<string> chapter;
-            in-out property<string> text;
+            in property<string> chapter;
+            in property<string> text;
 
             background: black;
 
@@ -57,16 +82,12 @@ fn android_main(app: android::AndroidApp) {
             }
         }
     }
-    let ui_text = TextWindow::new().unwrap();
+    let ui = TextWindow::new().unwrap();
 
-    save_index();
-    download_translation("schlachter");
-    let update_available = check_update("schlachter");
+    ui.set_chapter(get_title(&abbrev, book, chapter).unwrap().into());
+    ui.set_text(get_chapter(&abbrev, book, chapter).unwrap().into());
 
-    ui_text.set_chapter(get_title("schlachter", 18, 118).unwrap().into());
-    ui_text.set_text(get_chapter("schlachter", 18, 118).unwrap().into());
-
-    ui_text.run().unwrap();
+    ui.run().unwrap();
 }
 
 // Saves an index of all translations
@@ -90,7 +111,10 @@ fn download_translation(abbrev: &str) -> Result<(), Box<dyn Error>> {
 // Return a bool, wether the online version has a different checksum
 fn check_update(abbrev: &str) -> Result<bool, Box<dyn Error>> {
     let latest = get_latest_checksum(&abbrev)?;
-    let current = fs::read_to_string(format!("{}/{}-checksum.json", DATA_DIR, &abbrev))?;
+    let current = match fs::read_to_string(format!("{}/{}-checksum.json", DATA_DIR, &abbrev)) {
+        Ok(data) => data,
+        Err(_) => String::new(),
+    };
     Ok(latest != current)
 }
 
