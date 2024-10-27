@@ -1,5 +1,5 @@
 # This repository has been archived
-
+Please take a look at [OpenBible2](https://github.com/SchweGELBin/OpenBible2)
 
 # OpenBible
 This project aims to provide the BIBLE with minimal distractions as an Android App.
