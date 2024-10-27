@@ -1,3 +1,6 @@
+# This reposidory has been archived
+
+
 # OpenBible
 This project aims to provide the BIBLE with minimal distractions as an Android App.
 
