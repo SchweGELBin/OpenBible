@@ -1,4 +1,4 @@
-# This reposidory has been archived
+# This repository has been archived
 
 
 # OpenBible
